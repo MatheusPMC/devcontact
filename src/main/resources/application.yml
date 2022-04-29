@@ -1,0 +1,7 @@
+micronaut:
+  application:
+    name: devcontact
+netty:
+  default:
+    allocator:
+      max-order: 3
