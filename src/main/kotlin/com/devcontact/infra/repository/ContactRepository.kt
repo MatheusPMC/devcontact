@@ -42,6 +42,20 @@ class ContactRepository(
         return contactEntity
     }
 
+    override fun delContactRepository(id: String): String {
+        var result = getCollection()
+            .deleteOne(
+                Filters.eq("contactId", id)
+            ).deletedCount
+
+        return if (result.toInt() == 1) {
+            "Disciplina-apagada-com-sucesso!"
+        } else {
+            "Disciplina-não-Encontrada"
+        }
+
+    }
+
     private fun getCollection() =
         mongoClient
             .getDatabase("dev")

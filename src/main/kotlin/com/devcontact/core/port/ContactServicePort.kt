@@ -7,4 +7,5 @@ interface ContactServicePort {
     fun getOneContact(userContactEntity: UserContactEntity): UserContactEntity?
     fun postContact(userContactEntity: UserContactEntity): UserContactEntity
     fun putContact(userContactEntity: UserContactEntity): UserContactEntity
+    fun delContact(id: String): String
 }

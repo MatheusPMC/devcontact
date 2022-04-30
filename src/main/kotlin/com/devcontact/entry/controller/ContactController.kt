@@ -48,4 +48,12 @@ class ContactController(
         val result = contactServicePort.putContact(userContactEntity)
         return HttpResponse.ok(result).status(200)
     }
+
+    @Delete("/{id}")
+    @Secured("viewer")
+    @Produces
+    fun delContact(@PathVariable id: String): MutableHttpResponse<String>? {
+        val result = contactServicePort.delContact(id)
+        return HttpResponse.ok(result).status(200)
+    }
 }

@@ -28,4 +28,8 @@ class ContactService(
         val repository = contactRepositoryPort.putContactRepository(userContactEntity)
         return repository
     }
+
+    override fun delContact(id: String): String {
+        return contactRepositoryPort.delContactRepository(id)
+    }
 }
