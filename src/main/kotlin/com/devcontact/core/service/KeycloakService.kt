@@ -7,6 +7,7 @@ import com.devcontact.core.config.KeycloakConfiguration
 import com.devcontact.core.port.KeyclockSevicePort
 import com.devcontact.entry.dto.LoginRequest
 import com.devcontact.entry.dto.UserRequest
+import com.devcontact.infra.entity.UserEntity
 import com.google.gson.JsonParser
 import com.nimbusds.jose.jwk.JWK
 import com.squareup.okhttp.MediaType
@@ -57,7 +58,7 @@ class KeycloakService(
             }
         }
 
-         fun getUser(token: String?, password: String?): Test {
+         fun getUser(token: String?, password: String?): UserEntity {
             val mediaType = MediaType.parse("application/json")
             val body = RequestBody.create(mediaType, "{}")
             val request = Request.Builder()
@@ -71,22 +72,22 @@ class KeycloakService(
             val responseBodyToString = response.body().string()
             val responseBodyToJson = JsonParser.parseString(responseBodyToString)
 
-            var test = Test()
-            test.sub = responseBodyToJson.asJsonObject["sub"].asString
-            test.email_verified = responseBodyToJson.asJsonObject["email_verified"].asBoolean
-            test.name = responseBodyToJson.asJsonObject["name"].asString
-            test.preferred_username = responseBodyToJson.asJsonObject["preferred_username"].asString
-            test.given_name = responseBodyToJson.asJsonObject["given_name"].asString
-            test.family_name = responseBodyToJson.asJsonObject["family_name"].asString
-            test.email = responseBodyToJson.asJsonObject["email"].asString
-            test.password = password
+            var userEntity = UserEntity()
+             userEntity.sub = responseBodyToJson.asJsonObject["sub"].asString
+             userEntity.email_verified = responseBodyToJson.asJsonObject["email_verified"].asBoolean
+             userEntity.name = responseBodyToJson.asJsonObject["name"].asString
+             userEntity.preferred_username = responseBodyToJson.asJsonObject["preferred_username"].asString
+             userEntity.given_name = responseBodyToJson.asJsonObject["given_name"].asString
+             userEntity.family_name = responseBodyToJson.asJsonObject["family_name"].asString
+             userEntity.email = responseBodyToJson.asJsonObject["email"].asString
+             userEntity.password = password
 
-            println("entrou no response" + test)
+            println("entrou no response" + userEntity)
 
-            return test
+            return userEntity
         }
 
-        override fun signUp(user: UserRequest): UserRequest {
+        override fun signUp(user: UserRequest): UserEntity {
             logger().info("signUp - Inicio do serviÃ§o keycloak")
 
             val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
@@ -131,7 +132,16 @@ class KeycloakService(
             println(testResult)
 
             logger().info("signUp - usuÃ¡rio registrado no keycloak!")
-            return UserRequest(user.userName, user.firstName, user.lastName, user.email, user.password)
+            return UserEntity(
+                sub = testResult.sub,
+                email_verified = testResult.email_verified,
+                name = testResult.name,
+                preferred_username = testResult.preferred_username,
+                given_name = testResult.given_name,
+                family_name = testResult.family_name,
+                email = testResult.email,
+                password = testResult.password
+            )
         }
 
         override fun putUser(user: UserPutdata): UserPutdata {
