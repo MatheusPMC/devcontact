@@ -9,6 +9,10 @@ import io.micronaut.context.annotation.Prototype
 class ContactService(
     private val contactRepositoryPort: ContactRepositoryPort
 ): ContactServicePort {
+    override fun getAllContacts(sub: String): List<UserContactEntity> {
+        var repository = contactRepositoryPort.getAllContactsRepository(sub)
+        return repository
+    }
 
     override fun postContact(userContactEntity: UserContactEntity): UserContactEntity {
         var repository = contactRepositoryPort.postContactRepository(userContactEntity)

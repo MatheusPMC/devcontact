@@ -4,10 +4,7 @@ import com.devcontact.core.port.ContactServicePort
 import com.devcontact.infra.entity.UserContactEntity
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MutableHttpResponse
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Post
-import io.micronaut.http.annotation.Produces
+import io.micronaut.http.annotation.*
 import io.micronaut.security.annotation.Secured
 import java.util.*
 
@@ -15,6 +12,14 @@ import java.util.*
 class ContactController(
     private val contactServicePort: ContactServicePort
 ) {
+
+    @Get("/{sub}")
+    @Secured("viewer")
+    @Produces
+    fun getAllContacts(@PathVariable sub: String): MutableHttpResponse<List<UserContactEntity>>? {
+        var result = contactServicePort.getAllContacts(sub)
+        return HttpResponse.ok(result).status(200)
+    }
 
     @Post("contact")
     @Secured("viewer")
