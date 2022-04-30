@@ -6,6 +6,7 @@ import com.devcontact.commons.handler.KeycloakException
 import com.devcontact.core.config.KeycloakConfiguration
 import com.devcontact.core.port.KeyclockSevicePort
 import com.devcontact.entry.dto.LoginRequest
+import com.devcontact.entry.dto.UserRequest
 import com.google.gson.JsonParser
 import com.nimbusds.jose.jwk.JWK
 import com.squareup.okhttp.MediaType
@@ -91,57 +92,56 @@ class KeycloakService(
 
         //TODO: Create User
 
-//
-//        override fun signUp(user: UserRequest): UserRequest {
-//            logger().info("signUp - Inicio do serviÃ§o keycloak")
-//
-//            val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
-//
-//            logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
-//            val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
-//                logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
-//                tokenAdminCliCache
-//            } else {
-//                logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
-//                keycloakCacheService.deleteTokenAdminCliCache()
-//
-//                val accessTokenAdminCli = this.getAccessTokenAdminCli()
-//                keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
-//
-//                println(accessTokenAdminCli)
-//                accessTokenAdminCli
-//            }
-//
-//            val mediaType = MediaType.parse("application/json")
-//            val body = RequestBody.create(mediaType, "{\"firstName\":\"${user.firstName}\"," +
-//                    "\"lastName\":\"${user.lastName}\"," +
-//                    "\"username\":\"${user.userName}\"," +
-//                    "\"email\":\"${user.email}\"," +
-//                    "\"emailVerified\":${true}," +
-//                    "\"credentials\":[{\"type\":\"password\",\"value\":\"${user.password}\",\"temporary\":false}],\"enabled\":true}")
-//            val request = Request.Builder()
-//                .url(keycloakConfiguration.usersRegisterUrl)
-//                .post(body)
-//                .addHeader("Content-Type", "application/json")
-//                .addHeader("Authorization", "Bearer $accessToken")
-//                .build()
-//
-//            val response = client.newCall(request).execute()
-//            if (!response.isSuccessful) {
-//                throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
-//            }
-//
-//            var result = keycloakLoginSevicePort.getTokenUser(LoginRequest(user.userName, user.password))
-//            println(result)
-//            var testResult = keycloackGetUserPort.getUsuer(result?.token, user.password)
-//            println(testResult)
-//
+        override fun signUp(user: UserRequest): UserRequest {
+            logger().info("signUp - Inicio do serviÃ§o keycloak")
+
+            val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
+
+            logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
+            val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
+                logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
+                tokenAdminCliCache
+            } else {
+                logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
+                keycloakCacheService.deleteTokenAdminCliCache()
+
+                val accessTokenAdminCli = this.getAccessTokenAdminCli()
+                keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
+
+                println(accessTokenAdminCli)
+                accessTokenAdminCli
+            }
+
+            val mediaType = MediaType.parse("application/json")
+            val body = RequestBody.create(mediaType, "{\"firstName\":\"${user.firstName}\"," +
+                    "\"lastName\":\"${user.lastName}\"," +
+                    "\"username\":\"${user.userName}\"," +
+                    "\"email\":\"${user.email}\"," +
+                    "\"emailVerified\":${true}," +
+                    "\"credentials\":[{\"type\":\"password\",\"value\":\"${user.password}\",\"temporary\":false}],\"enabled\":true}")
+            val request = Request.Builder()
+                .url(keycloakConfiguration.usersRegisterUrl)
+                .post(body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer $accessToken")
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
+            }
+
+            var result = getTokenUser(LoginRequest(user.userName, user.password))
+            println(result)
+            var testResult =  getUser(result?.token, user.password)
+            println(testResult)
+
 //            userRepositoryPort.postUserRepository(testResult)
-//
-//
-//            logger().info("signUp - usuÃ¡rio registrado no keycloak!")
-//            return UserRequest(user.userName, user.firstName, user.lastName, user.email, user.password)
-//        }
+
+
+            logger().info("signUp - usuÃ¡rio registrado no keycloak!")
+            return UserRequest(user.userName, user.firstName, user.lastName, user.email, user.password)
+        }
 //
 //
 //        //TODO: Put User
