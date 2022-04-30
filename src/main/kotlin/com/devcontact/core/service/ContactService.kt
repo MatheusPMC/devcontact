@@ -14,6 +14,11 @@ class ContactService(
         return repository
     }
 
+    override fun getOneContact(userContactEntity: UserContactEntity): UserContactEntity? {
+        val repository = contactRepositoryPort.getOneContactRepository(userContactEntity)
+        return repository
+    }
+
     override fun postContact(userContactEntity: UserContactEntity): UserContactEntity {
         var repository = contactRepositoryPort.postContactRepository(userContactEntity)
         return repository

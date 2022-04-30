@@ -21,6 +21,15 @@ class ContactController(
         return HttpResponse.ok(result).status(200)
     }
 
+    @Post("/{sub}")
+    @Secured("viewer")
+    @Produces
+    fun getOneContact(@PathVariable sub: String, @Body userContactEntity: UserContactEntity): MutableHttpResponse<UserContactEntity?>? {
+        println(userContactEntity)
+        val result = contactServicePort.getOneContact(userContactEntity)
+        return HttpResponse.ok(result).status(200)
+    }
+
     @Post("contact")
     @Secured("viewer")
     @Produces

@@ -18,6 +18,15 @@ class ContactRepository(
         return result
     }
 
+    override fun getOneContactRepository(userContactEntity: UserContactEntity): UserContactEntity? {
+        println(userContactEntity.contactId)
+        var contactEntity = getCollection().find(
+            Filters.eq("contactId", userContactEntity.contactId)).toList().firstOrNull()
+        println(contactEntity)
+        return contactEntity
+    }
+
+
     override fun postContactRepository(contactEntity: UserContactEntity): UserContactEntity {
         getCollection().insertOne(contactEntity)
         return contactEntity
