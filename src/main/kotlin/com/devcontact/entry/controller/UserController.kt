@@ -4,7 +4,6 @@ import com.devcontact.core.port.KeyclockSevicePort
 import com.devcontact.core.service.KeycloakService
 import com.devcontact.entry.dto.LoginRequest
 import com.devcontact.entry.dto.UserRequest
-import com.devcontact.infra.entity.UserContactEntity
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MutableHttpResponse
 import io.micronaut.http.annotation.*
@@ -40,5 +39,11 @@ class UserController(
         return HttpResponse.ok(result).status(200).body(user)
     }
 
-
+    @Delete("user/{sub}")
+    @Secured(SecurityRule.IS_ANONYMOUS)
+    fun deleteAccount(@PathVariable sub: String): MutableHttpResponse<String>? {
+        println(sub)
+        var result = keycloakServicePort.deleteUser(sub)
+        return HttpResponse.ok("Deletado")
+    }
 }

@@ -156,20 +156,20 @@ class KeycloakService(
             return user
         }
 
-//        override fun deleteUser(sub: String) {
-//            val client = OkHttpClient()
-//
-//            var accessToken = getToken()
-//
-//
-//            val request = Request.Builder()
-//                .url("http://localhost:8080/admin/realms/login/users/$sub")
-//                .delete(null)
-//                .addHeader("Authorization", "Bearer ${accessToken}")
-//                .build()
-//
-//            val response = client.newCall(request).execute()
-//        }
+        override fun deleteUser(sub: String) {
+            val client = OkHttpClient()
+
+            var accessToken = getToken()
+
+
+            val request = Request.Builder()
+                .url("http://localhost:8080/admin/realms/login/users/$sub")
+                .delete(null)
+                .addHeader("Authorization", "Bearer ${accessToken}")
+                .build()
+
+            val response = client.newCall(request).execute()
+        }
 
 
 
