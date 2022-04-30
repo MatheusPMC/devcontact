@@ -144,7 +144,7 @@ class KeycloakService(
             )
         }
 
-        override fun putUser(user: UserPutdata): UserPutdata {
+        override fun putUser(user: UserPutdata): UserEntity {
 
             logger().info("signUp - Inicio do serviÃ§o keycloak")
 
@@ -163,7 +163,19 @@ class KeycloakService(
             val response = client.newCall(request).execute()
             println(response.body())
 
-            return user
+            var result = getTokenUser(LoginRequest(user.userName, user.password))
+            var testResult =  getUser(result?.token, user.password)
+
+            return UserEntity(
+                sub = testResult.sub,
+                email_verified = testResult.email_verified,
+                name = testResult.name,
+                preferred_username = testResult.preferred_username,
+                given_name = testResult.given_name,
+                family_name = testResult.family_name,
+                email = testResult.email,
+                password = testResult.password
+            )
         }
 
         override fun deleteUser(sub: String) {

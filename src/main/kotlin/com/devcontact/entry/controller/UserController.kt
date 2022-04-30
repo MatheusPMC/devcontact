@@ -36,10 +36,10 @@ class UserController(
 
     @Put("put")
     @Secured(SecurityRule.IS_ANONYMOUS)
-    fun putAccount(@Body user: KeycloakService.UserPutdata): MutableHttpResponse<KeycloakService.UserPutdata>? {
+    fun putAccount(@Body user: KeycloakService.UserPutdata): MutableHttpResponse<UserEntity>? {
         println(user)
-        var result = keycloakServicePort.putUser(user)
-        return HttpResponse.ok(result).status(200).body(user)
+        var result = userServicePort.updateUser(user)
+        return HttpResponse.ok(result).status(200).body(result)
     }
 
     @Delete("user/{sub}")

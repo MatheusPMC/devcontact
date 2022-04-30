@@ -18,4 +18,10 @@ class UserService(
         var repository = userRepositoryPort.postUserRepository(createdUser)
         return repository
     }
+
+    override fun updateUser(userPutData: KeycloakService.UserPutdata): UserEntity {
+        var updatedUser = keyclockSevicePort.putUser(userPutData)
+        var repository = userRepositoryPort.putUserRepository(updatedUser)
+        return repository
+    }
 }
