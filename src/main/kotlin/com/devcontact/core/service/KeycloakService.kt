@@ -178,7 +178,7 @@ class KeycloakService(
             )
         }
 
-        override fun deleteUser(sub: String) {
+        override fun deleteUser(sub: String): String {
             val client = OkHttpClient()
 
             var accessToken = getToken()
@@ -191,6 +191,10 @@ class KeycloakService(
                 .build()
 
             val response = client.newCall(request).execute()
+//            if (!response.isSuccessful) {
+//                throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
+//            }
+            return sub
         }
 
 

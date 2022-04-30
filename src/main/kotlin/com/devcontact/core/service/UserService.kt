@@ -24,4 +24,10 @@ class UserService(
         var repository = userRepositoryPort.putUserRepository(updatedUser)
         return repository
     }
+
+    override fun deleteUser(id: String): String {
+        var deleteUser = keyclockSevicePort.deleteUser(id)
+        var repository = userRepositoryPort.delUserRepository(deleteUser)
+        return repository
+    }
 }

@@ -10,5 +10,5 @@ interface KeyclockSevicePort {
 //    fun getUser(token: String?, password: String?): KeycloakService.Test
     fun signUp(user: UserRequest): UserEntity
     fun putUser(user: KeycloakService.UserPutdata): UserEntity
-    fun deleteUser(sub: String)
+    fun deleteUser(sub: String): String
 }

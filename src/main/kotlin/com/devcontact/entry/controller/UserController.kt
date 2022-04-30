@@ -46,7 +46,7 @@ class UserController(
     @Secured(SecurityRule.IS_ANONYMOUS)
     fun deleteAccount(@PathVariable sub: String): MutableHttpResponse<String>? {
         println(sub)
-        var result = keycloakServicePort.deleteUser(sub)
-        return HttpResponse.ok("Deletado")
+        var result = userServicePort.deleteUser(sub)
+        return HttpResponse.ok(result).status(200).body(result)
     }
 }

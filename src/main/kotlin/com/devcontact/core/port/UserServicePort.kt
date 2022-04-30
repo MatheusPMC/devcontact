@@ -7,4 +7,5 @@ import com.devcontact.infra.entity.UserEntity
 interface UserServicePort {
     fun createUser(userRequest: UserRequest): UserEntity
     fun updateUser(userPutData: KeycloakService.UserPutdata): UserEntity
+    fun deleteUser(id: String): String
 }

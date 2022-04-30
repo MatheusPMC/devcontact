@@ -38,6 +38,19 @@ class UserRepository(
         return userEntity
     }
 
+    override fun delUserRepository(id: String): String {
+        var result = getCollection()
+            .deleteOne(
+                Filters.eq("sub", id)
+            ).deletedCount
+
+        return if (result.toInt() == 1) {
+            "User-apagado-com-sucesso!"
+        } else {
+            "User-não-Encontrado"
+        }
+    }
+
     private fun getCollection() =
         mongoClient
             .getDatabase("dev")
