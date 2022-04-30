@@ -8,6 +8,6 @@ interface KeyclockSevicePort {
     fun getTokenUser(user: LoginRequest): KeycloakService.UserToken
 //    fun getUser(token: String?, password: String?): KeycloakService.Test
     fun signUp(user: UserRequest): UserRequest
-//    fun putUser(user: KeycloakService.UserPutdata): KeycloakService.UserPutdata
+    fun putUser(user: KeycloakService.UserPutdata): KeycloakService.UserPutdata
 //    fun deleteUser(sub: String)
 }

@@ -48,7 +48,6 @@ class KeycloakService(
                 logger().info("getAccessTokenAdminCli - access_token capturado!")
                 var token = responseBodyToJson.asJsonObject["access_token"].asString
                 var user = getUser(token, null)
-//            var user = userRepositoryPort.getOneUserRepository(user.usuario)
                 var responseUser = UserToken(user.sub, token)
 
                 return responseUser
@@ -58,8 +57,6 @@ class KeycloakService(
             }
         }
 
-
-        //TODO GET USER
          fun getUser(token: String?, password: String?): Test {
             val mediaType = MediaType.parse("application/json")
             val body = RequestBody.create(mediaType, "{}")
@@ -88,9 +85,6 @@ class KeycloakService(
 
             return test
         }
-
-
-        //TODO: Create User
 
         override fun signUp(user: UserRequest): UserRequest {
             logger().info("signUp - Inicio do serviÃ§o keycloak")
@@ -136,41 +130,32 @@ class KeycloakService(
             var testResult =  getUser(result?.token, user.password)
             println(testResult)
 
-//            userRepositoryPort.postUserRepository(testResult)
-
-
             logger().info("signUp - usuÃ¡rio registrado no keycloak!")
             return UserRequest(user.userName, user.firstName, user.lastName, user.email, user.password)
         }
-//
-//
-//        //TODO: Put User
-//
-//
-//        override fun putUser(user: UserPutdata): UserPutdata {
-//
-//            logger().info("signUp - Inicio do serviÃ§o keycloak")
-//
-//            var accessToken = getToken()
-//
-//            val mediaType = MediaType.parse("application/json")
-//            val body = RequestBody.create(mediaType,
-//                "{\n\t\"email\" : \"${user.email}\",\n\t\"lastName\": \"${user.lastName}\",\n\t\"firstName\": \"${user.firstName}\",\n\t\"credentials\": [{ \n\t\t\"type\": \"password\",\n\t\t\"value\": \"${user.password}\"\n}]\t\n}")
-//            val request = Request.Builder()
-//                .url("http://localhost:8080/admin/realms/login/users/${user.sub}")
-//                .put(body)
-//                .addHeader("Content-Type", "application/json")
-//                .addHeader("Authorization", "Bearer $accessToken")
-//                .build()
-//
-//            val response = client.newCall(request).execute()
-//            println(response.body())
-//
-//            return user
-//        }
-//
-//
-//        //TODO: Delete User
+
+        override fun putUser(user: UserPutdata): UserPutdata {
+
+            logger().info("signUp - Inicio do serviÃ§o keycloak")
+
+            var accessToken = getToken()
+
+            val mediaType = MediaType.parse("application/json")
+            val body = RequestBody.create(mediaType,
+                "{\n\t\"email\" : \"${user.email}\",\n\t\"lastName\": \"${user.lastName}\",\n\t\"firstName\": \"${user.firstName}\",\n\t\"credentials\": [{ \n\t\t\"type\": \"password\",\n\t\t\"value\": \"${user.password}\"\n}]\t\n}")
+            val request = Request.Builder()
+                .url("http://localhost:8080/admin/realms/login/users/${user.sub}")
+                .put(body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer $accessToken")
+                .build()
+
+            val response = client.newCall(request).execute()
+            println(response.body())
+
+            return user
+        }
+
 //        override fun deleteUser(sub: String) {
 //            val client = OkHttpClient()
 //
@@ -185,29 +170,29 @@ class KeycloakService(
 //
 //            val response = client.newCall(request).execute()
 //        }
-//
-//
-//
-//
-//        private fun getToken(): String {
-//            val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
-//
-//            logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
-//            val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
-//                logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
-//                tokenAdminCliCache
-//            } else {
-//                logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
-//                keycloakCacheService.deleteTokenAdminCliCache()
-//
-//                val accessTokenAdminCli = this.getAccessTokenAdminCli()
-//                keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
-//
-//                println(accessTokenAdminCli)
-//                accessTokenAdminCli
-//            }
-//            return accessToken
-//        }
+
+
+
+
+        private fun getToken(): String {
+            val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
+
+            logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
+            val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
+                logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
+                tokenAdminCliCache
+            } else {
+                logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
+                keycloakCacheService.deleteTokenAdminCliCache()
+
+                val accessTokenAdminCli = this.getAccessTokenAdminCli()
+                keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
+
+                println(accessTokenAdminCli)
+                accessTokenAdminCli
+            }
+            return accessToken
+        }
 
         private fun getAccessTokenAdminCli(): String {
             logger().info("getAccessTokenAdminCli - capturando o access_token do admin-cli")
