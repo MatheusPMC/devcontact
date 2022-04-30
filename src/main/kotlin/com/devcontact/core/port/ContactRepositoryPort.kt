@@ -6,4 +6,5 @@ interface ContactRepositoryPort {
     fun getAllContactsRepository(sub: String): List<UserContactEntity>
     fun getOneContactRepository(userContactEntity: UserContactEntity): UserContactEntity?
     fun postContactRepository(userContactEntity: UserContactEntity): UserContactEntity
+    fun putContactRepository(userContactEntity: UserContactEntity): UserContactEntity
 }

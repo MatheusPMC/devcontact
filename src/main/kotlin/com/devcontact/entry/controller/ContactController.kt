@@ -39,4 +39,13 @@ class ContactController(
         val result = contactServicePort.postContact(userContactEntity)
         return HttpResponse.created(result).status(201)
     }
+
+    @Put("/{id}")
+    @Secured("viewer")
+    @Produces
+    fun putContact(@Body userContactEntity: UserContactEntity, @PathVariable id: String): MutableHttpResponse<UserContactEntity>? {
+        userContactEntity.contactId = id
+        val result = contactServicePort.putContact(userContactEntity)
+        return HttpResponse.ok(result).status(200)
+    }
 }

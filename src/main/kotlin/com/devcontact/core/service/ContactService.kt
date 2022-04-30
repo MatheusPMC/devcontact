@@ -23,4 +23,9 @@ class ContactService(
         var repository = contactRepositoryPort.postContactRepository(userContactEntity)
         return repository
     }
+
+    override fun putContact(userContactEntity: UserContactEntity): UserContactEntity {
+        val repository = contactRepositoryPort.putContactRepository(userContactEntity)
+        return repository
+    }
 }

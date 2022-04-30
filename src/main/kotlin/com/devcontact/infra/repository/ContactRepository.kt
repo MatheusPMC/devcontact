@@ -32,6 +32,16 @@ class ContactRepository(
         return contactEntity
     }
 
+    override fun putContactRepository(contactEntity: UserContactEntity): UserContactEntity {
+         getCollection()
+            .replaceOne(
+                Filters.eq("contactId", contactEntity.contactId),
+                contactEntity
+            )
+
+        return contactEntity
+    }
+
     private fun getCollection() =
         mongoClient
             .getDatabase("dev")
