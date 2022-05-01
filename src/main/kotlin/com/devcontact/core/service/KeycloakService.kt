@@ -28,9 +28,11 @@ class KeycloakService(
 
 ): KeyclockSevicePort, TestLogging {
 
-    val client = OkHttpClient()
+    private val client = OkHttpClient()
 
-        override fun getTokenUser(user: LoginRequest): UserToken {
+        override fun loginUserKc(user: LoginRequest): UserToken {
+            logger().info("getLoginUser - Inicio do Login no keycloak")
+
             val mediaType = MediaType.parse("application/x-www-form-urlencoded")
             val body = RequestBody.create(mediaType,
                 "username=${user.usuario}&password=${user.senha}&grant_type=password&client_id=${keycloakConfiguration.clientId}&client_secret=${keycloakConfiguration.clientSecret}")
@@ -44,68 +46,23 @@ class KeycloakService(
             val responseBodyToString = response.body().string()
             val responseBodyToJson = JsonParser.parseString(responseBodyToString)
 
-            println(responseBodyToJson.asJsonObject["access_token"].asString)
             if (responseBodyToString.contains("access_token")) {
-                logger().info("getAccessTokenAdminCli - access_token capturado!")
+                logger().info("getLoginUser - access_token capturado!")
                 var token = responseBodyToJson.asJsonObject["access_token"].asString
                 var user = getUser(token, null)
                 var responseUser = UserToken(user.sub, token)
 
                 return responseUser
             } else {
-                logger().error("getAccessTokenAdminCli - access_token nÃ£o capturado!")
-                throw java.lang.RuntimeException("KeycloakSingUpService - Token not received")
+                logger().error("getLoginUser - access_token não capturado!")
+                throw KeycloakException("getLoginUser - Usuário ou senha incorreto")
             }
         }
 
-         fun getUser(token: String?, password: String?): UserEntity {
-            val mediaType = MediaType.parse("application/json")
-            val body = RequestBody.create(mediaType, "{}")
-            val request = Request.Builder()
-                .url("http://localhost:8080/realms/login/protocol/openid-connect/userinfo")
-                .post(body)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer $token")
-                .build()
+        override fun createUserKc(user: UserRequest): UserEntity {
+            logger().info("createUserKc - Inicio do cadastro no keycloak")
 
-            val response = client.newCall(request).execute()
-            val responseBodyToString = response.body().string()
-            val responseBodyToJson = JsonParser.parseString(responseBodyToString)
-
-            var userEntity = UserEntity()
-             userEntity.sub = responseBodyToJson.asJsonObject["sub"].asString
-             userEntity.email_verified = responseBodyToJson.asJsonObject["email_verified"].asBoolean
-             userEntity.name = responseBodyToJson.asJsonObject["name"].asString
-             userEntity.preferred_username = responseBodyToJson.asJsonObject["preferred_username"].asString
-             userEntity.given_name = responseBodyToJson.asJsonObject["given_name"].asString
-             userEntity.family_name = responseBodyToJson.asJsonObject["family_name"].asString
-             userEntity.email = responseBodyToJson.asJsonObject["email"].asString
-             userEntity.password = password
-
-            println("entrou no response" + userEntity)
-
-            return userEntity
-        }
-
-        override fun signUp(user: UserRequest): UserEntity {
-            logger().info("signUp - Inicio do serviÃ§o keycloak")
-
-            val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
-
-            logger().info("signUp - Verificando o Token do Admin Cli (CACHE)")
-            val accessToken = if (tokenAdminCliCache != null && this.verifyExpTokenAdminCli(tokenAdminCliCache)) {
-                logger().info("signUp - Token do admin cli (cache) Ã© vÃ¡lido")
-                tokenAdminCliCache
-            } else {
-                logger().info("signUp - Token do admin cli (cache) invÃ¡lido, gerando um novo...")
-                keycloakCacheService.deleteTokenAdminCliCache()
-
-                val accessTokenAdminCli = this.getAccessTokenAdminCli()
-                keycloakCacheService.saveTokenAdminCliCache(accessTokenAdminCli)
-
-                println(accessTokenAdminCli)
-                accessTokenAdminCli
-            }
+            var accessToken = getToken()
 
             val mediaType = MediaType.parse("application/json")
             val body = RequestBody.create(mediaType, "{\"firstName\":\"${user.firstName}\"," +
@@ -123,29 +80,26 @@ class KeycloakService(
 
             val response = client.newCall(request).execute()
             if (!response.isSuccessful) {
-                throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
+                throw KeycloakException("createUserKc - Não foi possível cadastrar o usuário")
+            } else {
+                var loginUser = loginUserKc(LoginRequest(user.userName, user.password))
+                var testResult =  getUser(loginUser?.token, user.password)
+
+                logger().info("createUserKc - Cadastrando o usuário")
+                return UserEntity(
+                    sub = testResult.sub,
+                    email_verified = testResult.email_verified,
+                    name = testResult.name,
+                    preferred_username = testResult.preferred_username,
+                    given_name = testResult.given_name,
+                    family_name = testResult.family_name,
+                    email = testResult.email,
+                    password = testResult.password
+                )
             }
-
-            var result = getTokenUser(LoginRequest(user.userName, user.password))
-            println(result)
-            var testResult =  getUser(result?.token, user.password)
-            println(testResult)
-
-            logger().info("signUp - usuÃ¡rio registrado no keycloak!")
-            return UserEntity(
-                sub = testResult.sub,
-                email_verified = testResult.email_verified,
-                name = testResult.name,
-                preferred_username = testResult.preferred_username,
-                given_name = testResult.given_name,
-                family_name = testResult.family_name,
-                email = testResult.email,
-                password = testResult.password
-            )
         }
 
         override fun putUser(user: UserPutdata): UserEntity {
-
             logger().info("signUp - Inicio do serviÃ§o keycloak")
 
             var accessToken = getToken()
@@ -163,7 +117,7 @@ class KeycloakService(
             val response = client.newCall(request).execute()
             println(response.body())
 
-            var result = getTokenUser(LoginRequest(user.userName, user.password))
+            var result = loginUserKc(LoginRequest(user.userName, user.password))
             var testResult =  getUser(result?.token, user.password)
 
             return UserEntity(
@@ -191,14 +145,41 @@ class KeycloakService(
                 .build()
 
             val response = client.newCall(request).execute()
-//            if (!response.isSuccessful) {
-//                throw KeycloakException("KeycloakSingUpService - NÃ£o foi possÃ­vel cadastrar o usuÃ¡rio")
-//            }
-            return sub
+            return if (!response.isSuccessful) {
+                "O Usuário não foi encontrado"
+            } else {
+                sub
+            }
         }
 
+    private fun getUser(token: String?, password: String?): UserEntity {
+        val mediaType = MediaType.parse("application/json")
+        val body = RequestBody.create(mediaType, "{}")
+        val request = Request.Builder()
+            .url("http://localhost:8080/realms/login/protocol/openid-connect/userinfo")
+            .post(body)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Authorization", "Bearer $token")
+            .build()
 
+        val response = client.newCall(request).execute()
+        val responseBodyToString = response.body().string()
+        val responseBodyToJson = JsonParser.parseString(responseBodyToString)
 
+        var userEntity = UserEntity()
+        userEntity.sub = responseBodyToJson.asJsonObject["sub"].asString
+        userEntity.email_verified = responseBodyToJson.asJsonObject["email_verified"].asBoolean
+        userEntity.name = responseBodyToJson.asJsonObject["name"].asString
+        userEntity.preferred_username = responseBodyToJson.asJsonObject["preferred_username"].asString
+        userEntity.given_name = responseBodyToJson.asJsonObject["given_name"].asString
+        userEntity.family_name = responseBodyToJson.asJsonObject["family_name"].asString
+        userEntity.email = responseBodyToJson.asJsonObject["email"].asString
+        userEntity.password = password
+
+        println("entrou no response" + userEntity)
+
+        return userEntity
+    }
 
         private fun getToken(): String {
             val tokenAdminCliCache = keycloakCacheService.readTokenAdminCliCache()
@@ -290,17 +271,6 @@ class KeycloakService(
 
             return keys[1].toString()
         }
-
-        data class Test(
-            var sub: String? = "",
-            var email_verified: Boolean? = false,
-            var name: String? = "",
-            var preferred_username: String? = "",
-            var given_name: String? = "",
-            var family_name: String? = "",
-            var email: String? = "",
-            var password: String? = "",
-        )
 
         data class UserPutdata(
             var sub: String = "",

@@ -22,7 +22,7 @@ class UserController(
     @Secured(SecurityRule.IS_ANONYMOUS)
     fun loginAccount(@Body user: LoginRequest): MutableHttpResponse<KeycloakService.UserToken>? {
         println(user)
-        var test = keycloakServicePort.getTokenUser(user)
+        var test = keycloakServicePort.loginUserKc(user)
         return HttpResponse.ok(test).status(200).body(test)
     }
 
