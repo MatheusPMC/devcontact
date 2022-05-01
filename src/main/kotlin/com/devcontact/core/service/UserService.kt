@@ -20,13 +20,13 @@ class UserService(
     }
 
     override fun updateUser(userPutData: KeycloakService.UserPutdata): UserEntity {
-        var updatedUser = keyclockSevicePort.putUser(userPutData)
+        var updatedUser = keyclockSevicePort.putUserKc(userPutData)
         var repository = userRepositoryPort.putUserRepository(updatedUser)
         return repository
     }
 
     override fun deleteUser(id: String): String {
-        var deleteUser = keyclockSevicePort.deleteUser(id)
+        var deleteUser = keyclockSevicePort.deleteUserKc(id)
         var repository = userRepositoryPort.delUserRepository(deleteUser)
         return repository
     }

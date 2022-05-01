@@ -31,7 +31,7 @@ class KeycloakService(
     private val client = OkHttpClient()
 
         override fun loginUserKc(user: LoginRequest): UserToken {
-            logger().info("getLoginUser - Inicio do Login no keycloak")
+            logger().info("loginUserKc - Inicio do Login no keycloak")
 
             val mediaType = MediaType.parse("application/x-www-form-urlencoded")
             val body = RequestBody.create(mediaType,
@@ -47,15 +47,15 @@ class KeycloakService(
             val responseBodyToJson = JsonParser.parseString(responseBodyToString)
 
             if (responseBodyToString.contains("access_token")) {
-                logger().info("getLoginUser - access_token capturado!")
+                logger().info("loginUserKc - access_token capturado!")
                 var token = responseBodyToJson.asJsonObject["access_token"].asString
                 var user = getUser(token, null)
                 var responseUser = UserToken(user.sub, token)
 
                 return responseUser
             } else {
-                logger().error("getLoginUser - access_token não capturado!")
-                throw KeycloakException("getLoginUser - Usuário ou senha incorreto")
+                logger().error("loginUserKc - access_token nao capturado!")
+                throw KeycloakException("loginUserKc - Usuario ou senha incorreto")
             }
         }
 
@@ -80,12 +80,12 @@ class KeycloakService(
 
             val response = client.newCall(request).execute()
             if (!response.isSuccessful) {
-                throw KeycloakException("createUserKc - Não foi possível cadastrar o usuário")
+                throw KeycloakException("createUserKc - Nao foi possivel cadastrar o usuario")
             } else {
                 var loginUser = loginUserKc(LoginRequest(user.userName, user.password))
                 var testResult =  getUser(loginUser?.token, user.password)
 
-                logger().info("createUserKc - Cadastrando o usuário")
+                logger().info("createUserKc - Cadastrando o usuario")
                 return UserEntity(
                     sub = testResult.sub,
                     email_verified = testResult.email_verified,
@@ -99,8 +99,9 @@ class KeycloakService(
             }
         }
 
-        override fun putUser(user: UserPutdata): UserEntity {
-            logger().info("signUp - Inicio do serviÃ§o keycloak")
+        override fun putUserKc(user: UserPutdata): UserEntity {
+            logger().info("putUserKc - Inicio da atualizacao do usuario no keycloak")
+
 
             var accessToken = getToken()
 
@@ -115,38 +116,42 @@ class KeycloakService(
                 .build()
 
             val response = client.newCall(request).execute()
-            println(response.body())
+            if (!response.isSuccessful) {
+                throw KeycloakException("putUserKc - Nao foi possivel atualizar o usuario")
+            } else {
 
-            var result = loginUserKc(LoginRequest(user.userName, user.password))
-            var testResult =  getUser(result?.token, user.password)
+                var result = loginUserKc(LoginRequest(user.userName, user.password))
+                var testResult = getUser(result?.token, user.password)
 
-            return UserEntity(
-                sub = testResult.sub,
-                email_verified = testResult.email_verified,
-                name = testResult.name,
-                preferred_username = testResult.preferred_username,
-                given_name = testResult.given_name,
-                family_name = testResult.family_name,
-                email = testResult.email,
-                password = testResult.password
-            )
+                logger().info("putUserKc - Atualizando o usuario")
+
+                return UserEntity(
+                    sub = testResult.sub,
+                    email_verified = testResult.email_verified,
+                    name = testResult.name,
+                    preferred_username = testResult.preferred_username,
+                    given_name = testResult.given_name,
+                    family_name = testResult.family_name,
+                    email = testResult.email,
+                    password = testResult.password
+                )
+            }
         }
 
-        override fun deleteUser(sub: String): String {
-            val client = OkHttpClient()
+        override fun deleteUserKc(sub: String): String {
+            logger().info("putUserKc - Inicio da atualizacao do usuario no keycloak")
 
             var accessToken = getToken()
-
 
             val request = Request.Builder()
                 .url("http://localhost:8080/admin/realms/login/users/$sub")
                 .delete(null)
-                .addHeader("Authorization", "Bearer ${accessToken}")
+                .addHeader("Authorization", "Bearer $accessToken")
                 .build()
 
             val response = client.newCall(request).execute()
             return if (!response.isSuccessful) {
-                "O Usuário não foi encontrado"
+                throw KeycloakException("deleteUser - O Usuario nao foi encontrado")
             } else {
                 sub
             }
@@ -175,8 +180,6 @@ class KeycloakService(
         userEntity.family_name = responseBodyToJson.asJsonObject["family_name"].asString
         userEntity.email = responseBodyToJson.asJsonObject["email"].asString
         userEntity.password = password
-
-        println("entrou no response" + userEntity)
 
         return userEntity
     }
